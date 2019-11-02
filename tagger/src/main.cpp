@@ -68,6 +68,7 @@ unsigned long timeLastshot = 0;
 
 bool reloading = false;
 unsigned long timeStartedReloading;
+const bool reloadInteruptable = true;
 
 void EventBLEConnect();
 void EventBLEDisconnect();
@@ -76,6 +77,7 @@ void EventFiredTagger();
 void EventOutOfAmmo();
 void EventReloading();
 void EventReloaded();
+void EventInteruptReload();
 
 
 void setup() {
@@ -96,9 +98,17 @@ void loop() {
       {
         if ((millis() - timeLastshot) >= IRShotDelay)
         {
-          Serial.println("Firing");
-          //tagger.IRTransmit();
-          EventFiredTagger();
+          if (reloading)
+          {
+            EventReloadInterrupted();
+            Serial.println("Firing");
+            //tagger.IRTransmit();
+            EventFiredTagger();
+          } else {
+            Serial.println("Firing");
+            //tagger.IRTransmit();
+            EventFiredTagger();
+          }
         }
       }
     }
@@ -168,8 +178,12 @@ void EventReloading()
 {
   Serial.println("EventReloading");
   //DacAudio.Play(&reload,true);
+  timeStartedReloading = millis();
   reloading = true;
-  canIshoot = false;
+  if (!reloadInteruptable)
+  {
+    canIshoot = false;
+  }
 //display
 }
 
@@ -183,4 +197,10 @@ void EventReloaded()
   reloading = 0;
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
+}
+
+void EventReloadInterrupted()
+{
+  Serial.println("EventReloadInterrupted");
+  reloading = false;
 }
