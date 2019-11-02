@@ -82,7 +82,7 @@ unsigned long timeLastshot = 0;
 
 bool reloading = false;
 unsigned long timeStartedReloading;
-const bool reloadInteruptable = true;
+const bool reloadInterruptable = true;
 
 void EventBLEConnect();
 void EventBLEDisconnect();
@@ -91,7 +91,7 @@ void EventFiredTagger();
 void EventOutOfAmmo();
 void EventReloading();
 void EventReloaded();
-void EventInteruptReload();
+void EventReloadInterrupted();
 
 //To be replace with bluetooth received variables
   int IRheader = 2400; //high
@@ -215,7 +215,7 @@ void EventReloading()
   //DacAudio.Play(&reload,true);
   timeStartedReloading = millis();
   reloading = true;
-  if (!reloadInteruptable)
+  if (!reloadInterruptable)
   {
     canIshoot = false;
   }
@@ -232,6 +232,7 @@ void EventReloaded()
   reloading = 0;
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
+  Serial.print('\n');
 }
 
 void EventReloadInterrupted()
