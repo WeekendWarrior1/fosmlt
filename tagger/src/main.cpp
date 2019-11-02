@@ -1,5 +1,7 @@
 //HARDWARE
 
+//#include <LiquidCrystal.h>    //save this for later, this library looks nice
+
 #include <Arduino.h>
 
 /********************************************************************GPIO PINS*/
@@ -85,7 +87,40 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  //DacAudio.FillBuffer();
+  if(digitalRead(trigger) == LOW)
+  {
+    if(canIshoot)// && currentAmmo > 0 && (millis() - timeLastshot) >= IRShotDelay)//&& BLEConnected)
+    {
+      if (currentAmmo > 0)
+      {
+        if ((millis() - timeLastshot) >= IRShotDelay)
+        {
+          Serial.println("Firing");
+          //tagger.IRTransmit();
+          EventFiredTagger();
+        }
+      }
+    }
+    else if (currentAmmo == 0)
+    {
+      EventOutOfAmmo();
+    }
+  }
+  if(digitalRead(reload) == LOW)
+  {
+    if(currentAmmo < maxAmmo && currentMagazines > 0 && !reloading)
+    {
+      EventReloading();
+    }
+  }
+  if (reloading)
+  {
+    if (millis() >= (reloadTime + timeStartedReloading))
+    {
+      EventReloaded();
+    }
+  }
 }
 
 /*************************************************************************EVENTS
@@ -119,7 +154,6 @@ void EventFiredTagger()
   Serial.print("Shot fired, Ammo: ");
   Serial.print(currentAmmo);
   Serial.print('\n');
-  //delay(50);
 }
 
 void EventOutOfAmmo()
@@ -134,7 +168,7 @@ void EventReloading()
 {
   Serial.println("EventReloading");
   //DacAudio.Play(&reload,true);
-  reloading = 1;
+  reloading = true;
   canIshoot = false;
 //display
 }
