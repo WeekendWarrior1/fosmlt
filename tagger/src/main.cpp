@@ -4,6 +4,8 @@
 
 #include <Arduino.h>
 
+#include <fosmltIRSend.h>
+
 /********************************************************************GPIO PINS*/
 //(anti-clockwise around chip, starting at top left corner)
 //GPIO 36
@@ -43,6 +45,7 @@
 
 #define reload 15
 #define trigger 2
+//#define IR_LED GPIO_NUM_5 //defining in fosmltIRSend
 
 /********************************************************************IR_Packet*/
 const uint8_t playerIDlength = 8; // Up to 256 players
@@ -104,6 +107,8 @@ void EventReloadInterrupted();
   int teamID = 2;
   //int gunDMG = gunDMG;
 
+  fosmltIRSend tagger;
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Setup");
@@ -121,6 +126,13 @@ void setup() {
   teamID = 2;
   //gunDMG = gunDMG;
   canIshoot = true;
+
+  //ble connection assumed below this point
+  Packet shotPacket;
+  shotPacket.playerID = playerID;
+  shotPacket.teamID = teamID;
+  shotPacket.gunDMG = gunDMG;
+  tagger.attach(shotPacket,IRheader,IR1,IR0,IRgap,IRfreq,playerIDlength,teamIDlength,gunDMGlength,packetTotalLength);
 }
 
 void loop() {
@@ -137,11 +149,11 @@ void loop() {
           {
             EventReloadInterrupted();
             Serial.println("Firing");
-            //tagger.IRTransmit();
+            tagger.IRTransmit();
             EventFiredTagger();
           } else {
             Serial.println("Firing");
-            //tagger.IRTransmit();
+            tagger.IRTransmit();
             EventFiredTagger();
           }
         }
