@@ -79,6 +79,16 @@ void EventReloading();
 void EventReloaded();
 void EventInteruptReload();
 
+//To be replace with bluetooth received variables
+  int IRheader = 2400; //high
+  int IR1 = 1200;      //high
+  int IR0 = 600;       //high
+  int IRgap = 600;     //low
+  int IRfreq = 56000;  //IR freq in Hz
+
+  int playerID = 170;
+  int teamID = 2;
+  //int gunDMG = gunDMG;
 
 void setup() {
   Serial.begin(115200);
@@ -86,6 +96,17 @@ void setup() {
   pinMode(reload, INPUT_PULLUP);
   pinMode(trigger, INPUT_PULLUP);
 
+  //To be replace with bluetooth received variables
+  IRheader = 2400; //high
+  IR1 = 1200;      //high
+  IR0 = 600;       //high
+  IRgap = 600;     //low
+  IRfreq = 56000;  //IR freq in Hz
+
+  playerID = 170;
+  teamID = 2;
+  //gunDMG = gunDMG;
+  canIshoot = true;
 }
 
 void loop() {
