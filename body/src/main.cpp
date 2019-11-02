@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include <fosmltIRReceive.h>
+
 /********************************************************************GPIO PINS*/
 //(anti-clockwise around chip, starting at top left corner)
 //GPIO 36
@@ -76,6 +78,7 @@ int IRfreq = 56000;    //IR freq in Hz
 //int IRheadermarginerror = 400;    //Margin of error of 400us when recieving IRheader
 //int IR1marginerror =  130;        //Margin of error of 130us when recieving IR1
 //int IR0marginerror = 50;          //Margin of error of 50us when recieving IR0
+fosmltIRReceive irReceiver(IRheader, IR1, IR0, IRgap, IRfreq, playerIDlength, teamIDlength, gunDMGlength, packettotallength);
 
 /***************************************************************GAME VARIABLES*/
 //TODO turn into GameVariable Struct
@@ -114,10 +117,56 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Setup");
 
+  irReceiver.clearIRbuffer(); //when a game starts, make sure to clear the buffer of any shots received prior
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  //DacAudio.FillBuffer();
+  switch (gameState)
+  {
+    case 5:
+      // statements
+      break;
+    case 4:
+      // statements
+      break;
+    case 3:
+      // statements
+      break;
+    case 2:
+      // statements
+      break;
+    case 1:
+      //Serial.println("gameState1");
+      //check for new ble taggers (send data) + connected event
+      irReceiver.IRBuffer();
+      if (irReceiver.shotReceviedFlag)
+      {
+        Serial.println("Received Packet");
+        Serial.println(irReceiver.receivedShot.playerID);
+        Serial.println(irReceiver.receivedShot.teamID);
+        Serial.println(irReceiver.receivedShot.gunDMG);
+        //parse packet, then do something with it
+        irReceiver.shotReceviedFlag = false;
+        parseReceivedShot(irReceiver.receivedShot.playerID,irReceiver.receivedShot.teamID,irReceiver.receivedShot.gunDMG);
+      }
+      if (staggered)
+      {
+        if ((staggerDuration + timeLastStaggered) >= millis())
+        {
+          EventUnstaggered();
+        }
+      }
+      if (GVtimelimit)
+      {
+        if(timeGameStarted + gameLength >= millis())
+        {
+          EventGameEnd();
+        }
+      }
+      //currentHealth only required here if processing damage ticks from DamageoverTime, but then that could be managed within there
+      break;
+  }
 }
 
 void EventStaggered(int receivedgunDMG)
