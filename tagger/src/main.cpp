@@ -50,6 +50,20 @@ const uint8_t teamIDlength = 2;  // Up to 4 teams
 const uint8_t gunDMGlength = 4;  // Up to 16 different damage values that can be sent
 const uint8_t packetTotalLength = playerIDlength + teamIDlength + gunDMGlength;
 
+/******************************************************************Reload Type*/
+#define buttonReload
+//define physicalMagazine
+//#define rechargingBattery
+
+//#define boltActionButton //could also include any weapon that requires cocking,
+// etc. Can be defined alongside other reload types
+
+/******************************************************************Firing Type*/
+#define fullAutomatic
+//#define semiAutomatic
+//#define rampingFireRate
+//#define chargingFire
+
 /***********************************************************************Tagger*/
 bool canIshoot = false;
 
