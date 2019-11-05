@@ -19,6 +19,7 @@ class fosmltIRSend
     rmt_config_t configTx;
     rmt_item32_t items[15];
     uint8_t shotPacketLength;
+    uint32_t totalTimeToFire;
   private:
 
 };

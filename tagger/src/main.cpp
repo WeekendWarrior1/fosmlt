@@ -13,7 +13,7 @@
 //GPIO 34
 //GPIO 35
 //GPIO 32
-//GPIO 33
+//GPIO 33 IR_LED
 //GPIO 25
 //GPIO 26
 //GPIO 27
@@ -45,7 +45,7 @@
 
 #define reload 15
 #define trigger 2
-//#define IR_LED GPIO_NUM_5 //defining in fosmltIRSend
+//#define IR_LED GPIO_NUM_33 //defining in fosmltIRSend
 
 /********************************************************************IR_Packet*/
 const uint8_t playerIDlength = 8; // Up to 256 players
@@ -114,7 +114,7 @@ void EventReloadInterrupted();
   int IR1 = 1200;      //high
   int IR0 = 600;       //high
   int IRgap = 600;     //low
-  int IRfreq = 56000;  //IR freq in Hz
+  int IRfreq = 38000;  //IR freq in Hz
 
   int playerID = 170;
   int teamID = 2;

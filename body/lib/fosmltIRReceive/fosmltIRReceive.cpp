@@ -4,14 +4,14 @@
 #include <stdio.h>
 
 //#define RMT_RX_ACTIVE_LEVEL 0 /*!< If we connect with a IR receiver, the data is active low */
-#define IR_Receiver GPIO_NUM_14
+#define IR_Rec GPIO_NUM_33
 
 fosmltIRReceive::fosmltIRReceive(int IRheaderRec, int IR1Rec, int IR0Rec, int IRgapRec, int IRfreqRec, uint8_t playerIDlengthRec, uint8_t teamIDlengthRec, uint8_t gunDMGlengthRec, uint8_t packettotallengthRec)
 {//https://github.com/rocketstrong600/LaserTag/blob/master/lib/MilesTag/MilesTag.cpp
 //http://www.buildlog.net/blog/2017/11/esp32-sending-short-pulses-with-the-rmt/
   configRx.rmt_mode = RMT_MODE_RX;
   configRx.channel = RMT_CHANNEL_1;
-  configRx.gpio_num = IR_Receiver;
+  configRx.gpio_num = IR_Rec;
   configRx.mem_block_num = 1;
   configRx.rx_config.filter_en = true;
   configRx.rx_config.filter_ticks_thresh = 255;
@@ -47,21 +47,23 @@ void fosmltIRReceive::IRBuffer() // TODO: test robustness of this by sending var
     if (item)
     {
       rmt_item32_t* itemproc = item;
-      for(int i = 0; i <= packettotallength;i++) //debug loop
+      /*for(int i = 0; i <= packettotallength;i++) //debug loop
       {
         printf("%i: %i\n", i,itemproc[i].duration0);
-      }
+      }*/
       for(size_t i=0; i < (rx_size / 4); i++)
       {
-        if(itemproc->duration0 < (IRheader+100) && itemproc->duration0 > (IRheader-100))
+        if(itemproc->duration0 < (IRheader+400) && itemproc->duration0 > (IRheader-100))
         {
+          printf("Header Received: %i\n",itemproc->duration0);
           for(int i=packettotallength; i >= 1; i--)
           {
-            if (itemproc[i].duration0 < (IR1+100) && itemproc[i].duration0 > (IR1-100))
+            printf("%i: %i\n", i,itemproc[i].duration0);
+            if (itemproc[i].duration0 < (IR1+400) && itemproc[i].duration0 > (IR1-100))
             {
               data = data | 1 << (packettotallength - i);
             }
-             else if(itemproc[i].duration0 < (IR0+100) && itemproc[i].duration0 > (IR0-100))
+             else if(itemproc[i].duration0 < (IR0+300) && itemproc[i].duration0 > (IR0-100))
             {
               data = data | 0 << (packettotallength - i);
             }

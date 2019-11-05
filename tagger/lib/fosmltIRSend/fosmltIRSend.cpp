@@ -3,7 +3,7 @@
 #include <driver/rmt.h>
 //#include <stdio.h>
 
-#define IR_LED GPIO_NUM_5
+#define IR_LED GPIO_NUM_33
 
 fosmltIRSend::fosmltIRSend()
 {}
@@ -41,6 +41,7 @@ void fosmltIRSend::attach(Packet shotPacket, int IRheader, int IR1, int IR0, int
   items[0].level0 = 1;
   items[0].duration1 = IRgap;
   items[0].level1 = 0;
+  totalTimeToFire = items[0].duration0 + items[0].duration1;
   int i = 1;
 	for (uint16_t  mask = 1U << (packettotallength - 1);  mask;  mask >>= 1) {
 		if (shotPacket2Item & mask) {
@@ -57,6 +58,8 @@ void fosmltIRSend::attach(Packet shotPacket, int IRheader, int IR1, int IR0, int
       items[i].level1 = 0;
     }
     //printf("%i\n", items[i].duration0);
+    totalTimeToFire = totalTimeToFire + items[i].duration0 + items[i].duration1;
+    printf("%i: %i\n", i, totalTimeToFire);
     i++;
   }
 }

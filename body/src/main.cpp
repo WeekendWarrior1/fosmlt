@@ -11,7 +11,7 @@
 //GPIO 34
 //GPIO 35
 //GPIO 32
-//GPIO 33
+//GPIO 33 IR_REC
 //GPIO 25
 //GPIO 26
 //GPIO 27
@@ -117,7 +117,9 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Setup");
 
-  irReceiver.clearIRbuffer(); //when a game starts, make sure to clear the buffer of any shots received prior
+  EventGameStart();
+  //irReceiver.clearIRbuffer(); //when a game starts, make sure to clear the buffer of any shots received prior
+  Serial.println(gameState);
 }
 
 void loop() {
