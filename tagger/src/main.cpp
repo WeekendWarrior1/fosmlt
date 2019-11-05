@@ -1,10 +1,12 @@
 //HARDWARE
 
 //#include <LiquidCrystal.h>    //save this for later, this library looks nice
+//8000Hz sampling rate gives you 125 seconds per MB
 
 #include <Arduino.h>
 
 #include <fosmltIRSend.h>
+#include <fosmltDisplay.h>
 
 /********************************************************************GPIO PINS*/
 //(anti-clockwise around chip, starting at top left corner)
@@ -53,14 +55,20 @@ const uint8_t teamIDlength = 2;  // Up to 4 teams
 const uint8_t gunDMGlength = 4;  // Up to 16 different damage values that can be sent
 const uint8_t packetTotalLength = playerIDlength + teamIDlength + gunDMGlength;
 
+/****************************************************************Magazine Type*/
+#define variableMagazine //eg Magazines stored in a variable on the tagger, resets on power reset (not recommended if player can access tagger power)
+//#define eepromMagazine //store and read ammo and Magazines in eeprom, meaning it remains after a power reset
+//define physicalMagazine //ammo is stored in the memory of an external magazine
+
 /******************************************************************Reload Type*/
 #define buttonReload
-//define physicalMagazine
 //#define rechargingBattery
+//define physicalReload //external magazine is removed and replaced
 
 //#define boltActionButton //could also include any weapon that requires cocking,
 // etc. Can be defined alongside other reload types
 //bool cocked is required to fire
+//bool cocked is required after reload
 
 /******************************************************************Firing Type*/
 #define fullAutomatic
@@ -122,6 +130,9 @@ void EventReloadInterrupted();
 
   fosmltIRSend tagger;
 
+/**********************************************************************Display*/
+  fosmltDisplay display;    //definitions done in fosmltDisplay.cpp && if tft display, platformio.ini buildflags
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Setup");
@@ -146,6 +157,11 @@ void setup() {
   shotPacket.teamID = teamID;
   shotPacket.gunDMG = gunDMG;
   tagger.attach(shotPacket,IRheader,IR1,IR0,IRgap,IRfreq,playerIDlength,teamIDlength,gunDMGlength,packetTotalLength);
+
+  Serial.println("Attempting to generate Tagger UI");
+  display.buildTaggerUI(currentAmmo,maxAmmo,currentMagazines,maxMagazines);
+  //display.buildPlayerUI(uint16_t currentShield,uint16_t maxShieldRec,uint16_t currentArmour,uint16_t maxArmourRec,uint16_t currentHealth,uint16_t maxHealthRec)
+
 }
 
 void loop() {
@@ -222,6 +238,7 @@ void EventFiredTagger()
   currentAmmo--;
   timeLastshot = millis();
   //DacAudio.Play(&shoot,true);
+  display.updateAmmo(currentAmmo);
   Serial.print("Shot fired, Ammo: ");
   Serial.print(currentAmmo);
   Serial.print('\n');
@@ -256,6 +273,7 @@ void EventReloaded()
   currentAmmo = maxAmmo;
   canIshoot = true;
   reloading = 0;
+  display.updateMagazines(currentMagazines);
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
   Serial.print('\n');

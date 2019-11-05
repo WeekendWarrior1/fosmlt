@@ -55,7 +55,6 @@ uint8_t currentArmour = 0;
 uint8_t maxArmour = 100; //set max armour to max health?
 uint8_t currentShields = 0;
 uint8_t maxShields = 100;
-uint8_t testValue = 140;
 
 bool canIShoot = false;
 
