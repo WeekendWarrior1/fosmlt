@@ -60,12 +60,25 @@ const uint8_t packetTotalLength = playerIDlength + teamIDlength + gunDMGlength;
 
 //#define boltActionButton //could also include any weapon that requires cocking,
 // etc. Can be defined alongside other reload types
+//bool cocked is required to fire
 
 /******************************************************************Firing Type*/
 #define fullAutomatic
+
 //#define semiAutomatic
+//requires removal of fire rate, requires debounce
+
 //#define rampingFireRate
+//automatic with decreasing time between shots
+
 //#define chargingFire
+//fire and release below a certain time = standard shot
+//else charge to a maximum amount over a set time
+//increasing damage is hard with our table
+//fires on trigger release
+
+//define overHeating
+//could be used alongside other firerates, requires logic for  gradually cooling down weapon
 
 /***********************************************************************Tagger*/
 bool canIshoot = false;
@@ -116,7 +129,7 @@ void setup() {
   pinMode(trigger, INPUT_PULLUP);
 
   //To be replace with bluetooth received variables
-  IRheader = 2400; //high
+  /*IRheader = 2400; //high
   IR1 = 1200;      //high
   IR0 = 600;       //high
   IRgap = 600;     //low
@@ -124,7 +137,7 @@ void setup() {
 
   playerID = 170;
   teamID = 2;
-  //gunDMG = gunDMG;
+  //gunDMG = gunDMG; */
   canIshoot = true;
 
   //ble connection assumed below this point
@@ -205,6 +218,7 @@ void EventBodyShot()
 void EventFiredTagger()
 {
   Serial.println("EventFiredTagger");
+  // set alarm for totalTimeToFire ms from now to start muzzle flash
   currentAmmo--;
   timeLastshot = millis();
   //DacAudio.Play(&shoot,true);

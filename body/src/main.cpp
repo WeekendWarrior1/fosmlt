@@ -124,19 +124,19 @@ void loop() {
   //DacAudio.FillBuffer();
   switch (gameState)
   {
-    case 5:
+    case 5: //playing
       // statements
       break;
-    case 4:
+    case 4: //demonstrating
       // statements
       break;
-    case 3:
+    case 3: //end of game idle
       // statements
       break;
-    case 2:
+    case 2: //idle
       // statements
       break;
-    case 1:
+    case 1: //development
       //Serial.println("gameState1");
       //check for new ble taggers (send data) + connected event
       irReceiver.IRBuffer();
