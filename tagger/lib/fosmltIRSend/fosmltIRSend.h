@@ -17,7 +17,7 @@ class fosmltIRSend
     void attach(Packet shotPacket, int IRheader, int IR1, int IR0, int IRgap, int IRfreq, uint8_t playerIDlength, uint8_t teamIDlength, uint8_t gunDMGlength, uint8_t packettotallength); //convert packet to RMT item here: fosmltIRSend(struct packet);
     void IRTransmit();
     rmt_config_t configTx;
-    rmt_item32_t items[15];
+    rmt_item32_t items[15]; //this can't be static forever
     uint8_t shotPacketLength;
     uint32_t totalTimeToFire;
   private:

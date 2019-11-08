@@ -25,19 +25,21 @@ class fosmltDisplay
     void reloadAnimation(uint8_t tick);
     //void displayHUD(uint16_t currentAmmo,uint16_t currentMagazines,uint16_t currentShield,uint16_t currentHealth);
 
-    void noMagazine();
+    void noMagazineInserted();
 
     void failedToFire();
 
     void buildTopBarUI(); //battery, time, connected to body or not, body battery
-    void buildTaggerUI(uint16_t currentAmmo,uint16_t maxAmmoRec,uint16_t currentMagazines,uint16_t maxMagazinesRec);
-    void buildPlayerUI(uint16_t currentShield,uint16_t maxShieldRec,uint16_t currentArmour,uint16_t maxArmourRec,uint16_t currentHealth,uint16_t maxHealthRec);
+    void buildTaggerUI(uint16_t currentAmmo,uint16_t maxAmmo,uint16_t currentMagazines,uint16_t maxMagazines);
+    void buildPlayerUI(uint16_t currentShield,uint16_t maxShield,uint16_t currentArmour,uint16_t maxArmour,uint16_t currentHealth,uint16_t maxHealth);
 
-    void buildAmmoUI(uint16_t currentAmmo,uint16_t maxAmmoRec);
-    void buildMagazineUI(uint16_t currentMagazines,uint16_t maxMagazinesRec);
-    void buildShieldUI(uint16_t currentShield,uint16_t maxShieldRec);
-    void buildArmourUI(uint16_t currentArmour,uint16_t maxArmourRec);
-    void buildHealthUI(uint16_t currentHealth,uint16_t maxHealthRec);
+
+//do I intend to use these privately 
+    void buildAmmoUI(uint16_t currentAmmo,uint16_t maxAmmo);
+    void buildMagazineUI(uint16_t currentMagazines,uint16_t maxMagazines);
+    void buildShieldUI(uint16_t currentShield,uint16_t maxShield);
+    void buildArmourUI(uint16_t currentArmour,uint16_t maxArmour);
+    void buildHealthUI(uint16_t currentHealth,uint16_t maxHealth);
 
     void updateBar(uint16_t current, uint16_t last, uint16_t max, uint8_t pos);
   private:

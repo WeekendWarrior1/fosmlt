@@ -72,7 +72,11 @@ void fosmltDisplay::updateAmmo(uint16_t currentAmmo)
   }
   #endif
   #if defined(tft128x160)
-  updateBar(currentAmmo,ammoLastValue,maxAmmo,3);
+  uint8_t attr = 3;
+  updateBar(currentAmmo,ammoLastValue,maxAmmo,attr);
+  tft.setCursor((hor-margin-20), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-20), textPos[attr], (fontSize*10), (fontSize*8), background);
+  tft.print(currentAmmo);
   #endif
   ammoLastValue = currentAmmo;
 }
@@ -101,7 +105,11 @@ void fosmltDisplay::updateMagazines(uint16_t currentMagazines)
   }
   #endif
   #if defined(tft128x160)
-  updateBar(currentMagazines,magazinesLastValue,maxMagazines,4);
+  uint8_t attr = 4;
+  updateBar(currentMagazines,magazinesLastValue,maxMagazines,attr);
+  tft.setCursor((hor-margin-20), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-20), textPos[attr], (fontSize*10), (fontSize*8), background);
+  tft.print(currentMagazines);
   #endif
   magazinesLastValue = currentMagazines;
 }
@@ -162,7 +170,11 @@ void fosmltDisplay::updateShield(uint16_t currentShield)
   
   #endif
   #if defined(tft128x160)
-  updateBar(currentShield,shieldLastValue,maxShield,0);
+  uint8_t attr = 0;
+  updateBar(currentShield,shieldLastValue,maxShield,attr);
+  tft.setCursor((hor-margin-30), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-30), textPos[attr], (fontSize*15), (fontSize*8), background);
+  tft.print(currentShield);
   #endif
   shieldLastValue = currentShield;
 }
@@ -170,7 +182,11 @@ void fosmltDisplay::updateShield(uint16_t currentShield)
 void fosmltDisplay::updateArmour(uint16_t currentArmour)
 {
   #if defined(tft128x160)
-  updateBar(currentArmour,armourLastValue,maxArmour,1);
+  uint8_t attr = 1;
+  updateBar(currentArmour,armourLastValue,maxArmour,attr);
+  tft.setCursor((hor-margin-30), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-30), textPos[attr], (fontSize*15), (fontSize*8), background);
+  tft.print(currentArmour);
   #endif
 }
 
@@ -199,9 +215,79 @@ void fosmltDisplay::updateHealth(uint16_t currentHealth)
   }*/
   #endif
   #if defined(tft128x160)
-  updateBar(currentHealth,healthLastValue,maxHealth,2);
+  uint8_t attr = 2;
+  updateBar(currentHealth,healthLastValue,maxHealth,attr);
+  tft.setCursor((hor-margin-30), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-30), textPos[attr], (fontSize*15), (fontSize*8), background);
+  tft.print(currentHealth);
   #endif
   healthLastValue = currentHealth;
+}
+
+void fosmltDisplay::buildAmmoUI(uint16_t currentAmmo,uint16_t maxAmmo)
+{
+  uint8_t arrayPos = 3;
+  tft.setTextColor(TFT_WHITE,background);
+  //printf("attributes[arrayPos]: %s, (hor/2): %i, textPos[arrayPos]: %i, fontSize: %i \n", attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize);
+  //tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  tft.setCursor(margin, textPos[arrayPos], fontSize);
+  tft.print(attributes[arrayPos]);
+
+  tft.setCursor((hor-margin-20), textPos[arrayPos], fontSize);
+  tft.print(currentAmmo);
+  //could build currentAmmo/maxAmmo
+}
+
+void fosmltDisplay::buildMagazineUI(uint16_t currentMagazines,uint16_t maxMagazines)
+{
+  uint8_t arrayPos = 4;
+  tft.setTextColor(TFT_WHITE,background);
+  //printf("attributes[arrayPos]: %s, (hor/2): %i, textPos[arrayPos]: %i, fontSize: %i \n", attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize);
+  //tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  tft.setCursor(margin, textPos[arrayPos], fontSize);
+  tft.print(attributes[arrayPos]);
+
+  tft.setCursor((hor-margin-20), textPos[arrayPos], fontSize);
+  tft.print(currentMagazines);
+}
+
+void fosmltDisplay::buildShieldUI(uint16_t currentShield,uint16_t maxShield)
+{
+  uint8_t arrayPos = 0;
+  tft.setTextColor(TFT_WHITE,background);
+  //printf("attributes[arrayPos]: %s, (hor/2): %i, textPos[arrayPos]: %i, fontSize: %i \n", attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize);
+  //tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  tft.setCursor(margin, textPos[arrayPos], fontSize);
+  tft.print(attributes[arrayPos]);
+
+  tft.setCursor((hor-margin-30), textPos[arrayPos], fontSize);
+  tft.print(currentShield);
+}
+
+void fosmltDisplay::buildArmourUI(uint16_t currentArmour,uint16_t maxArmour)
+{
+  uint8_t arrayPos = 1;
+  tft.setTextColor(TFT_WHITE,background);
+  //printf("attributes[arrayPos]: %s, (hor/2): %i, textPos[arrayPos]: %i, fontSize: %i \n", attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize);
+  //tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  tft.setCursor(margin, textPos[arrayPos], fontSize);
+  tft.print(attributes[arrayPos]);
+
+  tft.setCursor((hor-margin-30), textPos[arrayPos], fontSize);
+  tft.print(currentArmour);
+}
+
+void fosmltDisplay::buildHealthUI(uint16_t currentHealth,uint16_t maxHealth)
+{
+  uint8_t arrayPos = 2;
+  tft.setTextColor(TFT_WHITE,background);
+  //printf("attributes[arrayPos]: %s, (hor/2): %i, textPos[arrayPos]: %i, fontSize: %i \n", attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize);
+  //tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  tft.setCursor(margin, textPos[arrayPos], fontSize);
+  tft.print(attributes[arrayPos]);
+
+  tft.setCursor((hor-margin-30), textPos[arrayPos], fontSize);
+  tft.print(currentHealth);
 }
 
 void fosmltDisplay::updateBar(uint16_t current, uint16_t last, uint16_t max, uint8_t pos)
@@ -221,38 +307,32 @@ void fosmltDisplay::updateBar(uint16_t current, uint16_t last, uint16_t max, uin
 }
 
 
-void fosmltDisplay::buildTaggerUI(uint16_t currentAmmo,uint16_t maxAmmoRec,uint16_t currentMagazines,uint16_t maxMagazinesRec)
+void fosmltDisplay::buildTaggerUI(uint16_t currentAmmo,uint16_t maxAmmo,uint16_t currentMagazines,uint16_t maxMagazines)
 {
-  printf("currentAmmo: %i, maxAmmo: %i, currentMagazines: %i, maxMagazines: %i \n", currentAmmo,maxAmmoRec,currentMagazines,maxMagazinesRec);
-  uint8_t arrayPos;
-  maxAmmo = maxAmmoRec;
-  maxMagazines = maxMagazinesRec;
+  printf("currentAmmo: %i, maxAmmo: %i, currentMagazines: %i, maxMagazines: %i \n", currentAmmo,maxAmmo,currentMagazines,maxMagazines);
+  this->maxAmmo = maxAmmo;
+  this->maxMagazines = maxMagazines;
   
-  tft.setTextColor(TFT_WHITE,TFT_BLACK);
-  arrayPos = 3;
-  tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  buildAmmoUI(currentAmmo,maxAmmo);
   updateAmmo(currentAmmo);
-  arrayPos = 4;
-  tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+
+  buildMagazineUI(currentMagazines,maxMagazines);
   updateMagazines(currentMagazines);
 }
 
-void fosmltDisplay::buildPlayerUI(uint16_t currentShield,uint16_t maxShieldRec,uint16_t currentArmour,uint16_t maxArmourRec,uint16_t currentHealth,uint16_t maxHealthRec)
+void fosmltDisplay::buildPlayerUI(uint16_t currentShield,uint16_t maxShield,uint16_t currentArmour,uint16_t maxArmour,uint16_t currentHealth,uint16_t maxHealth)
 {
-  uint8_t arrayPos;
-  maxShield = maxShieldRec;
-  maxArmour = maxArmourRec;
-  maxHealth = maxHealthRec;
+  this->maxShield = maxShield;
+  this->maxArmour = maxArmour;
+  this->maxHealth = maxHealth;
   
-  tft.setTextColor(TFT_WHITE,TFT_BLACK);
-  arrayPos = 0;
-  tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+  buildShieldUI(currentShield,maxShield);
   updateShield(currentShield);
-  arrayPos = 1;
-  tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+
+  buildArmourUI(currentArmour,maxArmour);
   updateArmour(currentArmour);
-  arrayPos = 2;
-  tft.drawCentreString(attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize); //modify to left soon
+
+  buildHealthUI(currentHealth,maxHealth);
   updateHealth(currentHealth);
 }
 /*

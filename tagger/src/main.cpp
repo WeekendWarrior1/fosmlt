@@ -158,9 +158,11 @@ void setup() {
   shotPacket.gunDMG = gunDMG;
   tagger.attach(shotPacket,IRheader,IR1,IR0,IRgap,IRfreq,playerIDlength,teamIDlength,gunDMGlength,packetTotalLength);
 
-  Serial.println("Attempting to generate Tagger UI");
+  //display.buildMagazineUI(currentMagazines,maxMagazines);
   display.buildTaggerUI(currentAmmo,maxAmmo,currentMagazines,maxMagazines);
+  //display.buildMagazineUI(currentMagazines,maxMagazines);
   //display.buildPlayerUI(uint16_t currentShield,uint16_t maxShieldRec,uint16_t currentArmour,uint16_t maxArmourRec,uint16_t currentHealth,uint16_t maxHealthRec)
+  display.buildPlayerUI(100,100,100,100,100,100);
 
 }
 
@@ -273,6 +275,7 @@ void EventReloaded()
   currentAmmo = maxAmmo;
   canIshoot = true;
   reloading = 0;
+  display.updateAmmo(currentAmmo);
   display.updateMagazines(currentMagazines);
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
