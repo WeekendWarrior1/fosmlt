@@ -42,6 +42,7 @@ class fosmltDisplay
     void buildHealthUI(uint16_t currentHealth,uint16_t maxHealth);
 
     void updateBar(uint16_t current, uint16_t last, uint16_t max, uint8_t pos);
+    uint8_t digitLength(uint16_t num);
   private:
     uint16_t ammoLastValue;
     uint16_t magazinesLastValue;

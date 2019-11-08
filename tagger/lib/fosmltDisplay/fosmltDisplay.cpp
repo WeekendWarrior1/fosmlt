@@ -23,6 +23,8 @@ const uint8_t margin = 4;
 const uint8_t barWidth = 6;
 const uint8_t fullbarSize = (hor-(margin*2)); //120
 //const uint8_t elementSpacing = 2; //spacing for Gs //make this 28 maybe
+const uint8_t charW = 5;
+const uint8_t charH = 8;
 const uint8_t fontSize = 2;
 //uint8_t barPos = 20;
 //const uint8_t barSize = (hor-(margin*2)); //120
@@ -51,31 +53,19 @@ fosmltDisplay::fosmltDisplay()
 void fosmltDisplay::updateAmmo(uint16_t currentAmmo)
 {
   #if defined(lcd16x02)
-  if (currentAmmo > 99 && currentAmmo <= 999)                 //Ammo Formatting
-  {
-    lcd.setCursor(2,0);
-    lcd.print(currentAmmo);
-  }
-  else if (currentAmmo > 9 && currentAmmo <= 99)
-  {
-    lcd.setCursor(2,0);
-    lcd.print(' ');
-    lcd.setCursor(3,0);
-    lcd.print(currentAmmo);
-  }
-  else if (currentAmmo <= 9)
-  {
-    lcd.setCursor(2,0);
-    lcd.print("  ");
-    lcd.setCursor(4,0);
-    lcd.print(currentAmmo);
-  }
+  uint8_t digits = digitLength(currentAmmo);
+  lcd.setCursor(2,0); //we have room for 3 digits, starting at (2,0)
+  lcd.print("  ");  //wipe any potential spaces our string might not be long enough to write over
+  lcd.setCursor((5-digits),0);  //digits can be 1,2 or 3, meaning cursor is either 4,3 or 2 (perfect!)
+  lcd.print(currentAmmo);
   #endif
   #if defined(tft128x160)
-  uint8_t attr = 3;
-  updateBar(currentAmmo,ammoLastValue,maxAmmo,attr);
-  tft.setCursor((hor-margin-20), textPos[attr], fontSize);
-  tft.fillRect((hor-margin-20), textPos[attr], (fontSize*10), (fontSize*8), background);
+  uint8_t attr = 3; //shield's position in all of the UI's arrays
+  uint8_t digits = digitLength(currentAmmo);
+  uint8_t digitsLast = digitLength(ammoLastValue);  //get the length of the last ammo value, for writing over with a rect later
+  updateBar(currentAmmo,ammoLastValue,maxAmmo,attr);  //supports loss or gain of an attribute
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[attr], fontSize); //set the cursor far right padded eg. digit(1)*charW(5)*fontsize(2)=10 padding from margin
+  tft.fillRect((hor-margin-(digitsLast*charW*fontSize)), textPos[attr], (hor-margin-(digitsLast*charW*fontSize)), (fontSize*charH), background);  //write over old value using length of last value
   tft.print(currentAmmo);
   #endif
   ammoLastValue = currentAmmo;
@@ -84,31 +74,19 @@ void fosmltDisplay::updateAmmo(uint16_t currentAmmo)
 void fosmltDisplay::updateMagazines(uint16_t currentMagazines)
 {
   #if defined(lcd16x02)
-  if (currentMagazines > 99 && currentMagazines <= 999)       //Ammo Formatting
-  {
-    lcd.setCursor(10,0);
-    lcd.print(currentMagazines);
-  }
-  else if (currentMagazines > 9 && currentMagazines <= 99)
-  {
-    lcd.setCursor(10,0);
-    lcd.print(' ');
-    lcd.setCursor(11,0);
-    lcd.print(currentMagazines);
-  }
-  else if (currentMagazines <= 9)
-  {
-    lcd.setCursor(10,0);
-    lcd.print("  ");
-    lcd.setCursor(12,0);
-    lcd.print(currentMagazines);
-  }
+  uint8_t digits = digitLength(currentMagazines);
+  lcd.setCursor(10,0);
+  lcd.print("  ");
+  lcd.setCursor((13-digits),0);
+  lcd.print(currentMagazines);
   #endif
   #if defined(tft128x160)
   uint8_t attr = 4;
+  uint8_t digits = digitLength(currentMagazines);
+  uint8_t digitsLast = digitLength(magazinesLastValue);
   updateBar(currentMagazines,magazinesLastValue,maxMagazines,attr);
-  tft.setCursor((hor-margin-20), textPos[attr], fontSize);
-  tft.fillRect((hor-margin-20), textPos[attr], (fontSize*10), (fontSize*8), background);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-(digitsLast*charW*fontSize)), textPos[attr], (hor-margin-(digitsLast*charW*fontSize)), (fontSize*charH), background);
   tft.print(currentMagazines);
   #endif
   magazinesLastValue = currentMagazines;
@@ -140,40 +118,19 @@ void fosmltDisplay::reloadAnimation(uint8_t tick)
 void fosmltDisplay::updateShield(uint16_t currentShield)
 {
   #if defined(lcd16x02)
-  //std::string value = pRemote_BATT_Characteristic->readValue();
-  //String batt_caracteristic = value.c_str();
-
-  //std::string shieldsValue = pRemoteCharCurrentShields->readValue();
-  //Serial.println(shieldsValue.c_str());
-  //unsigned int shieldsInt = shieldsValue;
-  //uint8_t shieldsValue = shieldsU
-    
-  if (shieldsInt > 99 && shieldsInt <= 999)                 //Ammo Formatting
-  {
-    lcd.setCursor(2,1);
-    lcd.print(' ');
-  }
-  else if (shieldsInt > 9 && shieldsInt <= 99)
-  {
-    lcd.setCursor(2,1);
-    lcd.print(' ');
-    lcd.setCursor(3,1);
-    //lcd.print(shieldsValue.c_str());
-  }
-  else if (shieldsInt <= 9)
-  {
-    lcd.setCursor(2,1);
-    lcd.print("  ");
-    lcd.setCursor(4,1);
-    //lcd.print(shieldsValue.c_str());
-  }
-  
+  uint8_t digits = digitLength(currentShield);
+  lcd.setCursor(2,1);
+  lcd.print("  ");
+  lcd.setCursor((5-digits),1);
+  lcd.print(currentShield);
   #endif
   #if defined(tft128x160)
   uint8_t attr = 0;
+  uint8_t digits = digitLength(currentShield);
+  uint8_t digitsLast = digitLength(shieldLastValue);
   updateBar(currentShield,shieldLastValue,maxShield,attr);
-  tft.setCursor((hor-margin-30), textPos[attr], fontSize);
-  tft.fillRect((hor-margin-30), textPos[attr], (fontSize*15), (fontSize*8), background);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-(digitsLast*charW*fontSize)), textPos[attr], (hor-margin-(digitsLast*charW*fontSize)), (fontSize*charH), background);
   tft.print(currentShield);
   #endif
   shieldLastValue = currentShield;
@@ -183,42 +140,32 @@ void fosmltDisplay::updateArmour(uint16_t currentArmour)
 {
   #if defined(tft128x160)
   uint8_t attr = 1;
+  uint8_t digits = digitLength(currentArmour);
+  uint8_t digitsLast = digitLength(ammoLastValue);
   updateBar(currentArmour,armourLastValue,maxArmour,attr);
-  tft.setCursor((hor-margin-30), textPos[attr], fontSize);
-  tft.fillRect((hor-margin-30), textPos[attr], (fontSize*15), (fontSize*8), background);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-(digitsLast*charW*fontSize)), textPos[attr], (hor-margin-(digitsLast*charW*fontSize)), (fontSize*charH), background);
   tft.print(currentArmour);
   #endif
+  armourLastValue = currentArmour;
 }
 
 void fosmltDisplay::updateHealth(uint16_t currentHealth)
 {
   #if defined(lcd16x02)
-  /*
-  if (pRemoteCharCurrentHealth->getValue() > 99 && pRemoteCharCurrentHealth->getValue() <= 999)                 //Ammo Formatting
-  {
-    lcd.setCursor(10,1);
-    lcd.print(pRemoteCharCurrentHealth->getValue());
-  }
-  else if (pRemoteCharCurrentHealth->getValue() > 9 && pRemoteCharCurrentHealth->getValue() <= 99)
-  {
-    lcd.setCursor(10,1);
-    lcd.print(' ');
-    lcd.setCursor(11,1);
-    lcd.print(pRemoteCharCurrentHealth->getValue());
-  }
-  else if (pRemoteCharCurrentHealth->getValue() <= 9)
-  {
-    lcd.setCursor(10,1);
-    lcd.print("  ");
-    lcd.setCursor(12,1);
-    lcd.print(pRemoteCharCurrentHealth->getValue());
-  }*/
+  uint8_t digits = digitLength(currentHealth);
+  lcd.setCursor(10,1);
+  lcd.print("  ");
+  lcd.setCursor((13-digits),1);
+  lcd.print(currentHealth);
   #endif
   #if defined(tft128x160)
   uint8_t attr = 2;
+  uint8_t digits = digitLength(currentHealth);
+  uint8_t digitsLast = digitLength(healthLastValue);
   updateBar(currentHealth,healthLastValue,maxHealth,attr);
-  tft.setCursor((hor-margin-30), textPos[attr], fontSize);
-  tft.fillRect((hor-margin-30), textPos[attr], (fontSize*15), (fontSize*8), background);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[attr], fontSize);
+  tft.fillRect((hor-margin-(digitsLast*charW*fontSize)), textPos[attr], (hor-margin-(digitsLast*charW*fontSize)), (fontSize*charH), background);
   tft.print(currentHealth);
   #endif
   healthLastValue = currentHealth;
@@ -233,7 +180,8 @@ void fosmltDisplay::buildAmmoUI(uint16_t currentAmmo,uint16_t maxAmmo)
   tft.setCursor(margin, textPos[arrayPos], fontSize);
   tft.print(attributes[arrayPos]);
 
-  tft.setCursor((hor-margin-20), textPos[arrayPos], fontSize);
+  uint8_t digits = digitLength(currentAmmo);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[arrayPos], fontSize);
   tft.print(currentAmmo);
   //could build currentAmmo/maxAmmo
 }
@@ -247,7 +195,8 @@ void fosmltDisplay::buildMagazineUI(uint16_t currentMagazines,uint16_t maxMagazi
   tft.setCursor(margin, textPos[arrayPos], fontSize);
   tft.print(attributes[arrayPos]);
 
-  tft.setCursor((hor-margin-20), textPos[arrayPos], fontSize);
+  uint8_t digits = digitLength(currentMagazines);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[arrayPos], fontSize);
   tft.print(currentMagazines);
 }
 
@@ -260,7 +209,8 @@ void fosmltDisplay::buildShieldUI(uint16_t currentShield,uint16_t maxShield)
   tft.setCursor(margin, textPos[arrayPos], fontSize);
   tft.print(attributes[arrayPos]);
 
-  tft.setCursor((hor-margin-30), textPos[arrayPos], fontSize);
+  uint8_t digits = digitLength(currentShield);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[arrayPos], fontSize);
   tft.print(currentShield);
 }
 
@@ -273,7 +223,8 @@ void fosmltDisplay::buildArmourUI(uint16_t currentArmour,uint16_t maxArmour)
   tft.setCursor(margin, textPos[arrayPos], fontSize);
   tft.print(attributes[arrayPos]);
 
-  tft.setCursor((hor-margin-30), textPos[arrayPos], fontSize);
+  uint8_t digits = digitLength(currentArmour);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[arrayPos], fontSize);
   tft.print(currentArmour);
 }
 
@@ -286,7 +237,8 @@ void fosmltDisplay::buildHealthUI(uint16_t currentHealth,uint16_t maxHealth)
   tft.setCursor(margin, textPos[arrayPos], fontSize);
   tft.print(attributes[arrayPos]);
 
-  tft.setCursor((hor-margin-30), textPos[arrayPos], fontSize);
+  uint8_t digits = digitLength(currentHealth);
+  tft.setCursor((hor-margin-(digits*charW*fontSize)), textPos[arrayPos], fontSize);
   tft.print(currentHealth);
 }
 
@@ -304,6 +256,17 @@ void fosmltDisplay::updateBar(uint16_t current, uint16_t last, uint16_t max, uin
     else if (current == last)
   {
   }
+}
+uint8_t fosmltDisplay::digitLength(uint16_t num)
+{
+  uint8_t length = 0;
+  if (num == 0) {return 1;} //0 is still one digit
+  while (num > 0)
+  {
+    num = num/10;
+    length++;
+  }
+  return length;
 }
 
 

@@ -1,7 +1,7 @@
 //HARDWARE
 
 //#include <LiquidCrystal.h>    //save this for later, this library looks nice
-//8000Hz sampling rate gives you 125 seconds per MB
+//8000Hz sampling rate gives you 125 seconds of audio per MB
 
 #include <Arduino.h>
 
