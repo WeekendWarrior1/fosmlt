@@ -21,8 +21,10 @@ class fosmltDisplay
     void updateGameTime();
     void showGameSettings(); //what am I doing with this? When Game Starts, game settings should be sent to all taggers?
 
-    void reloadClear();
-    void reloadAnimation(uint8_t tick);
+    void reloadStart();
+    void reloadAnimation(uint32_t time, uint16_t reloadTime, uint32_t timeStartedReloading);
+    void reloadInterrupted();
+    void reloadFinish(uint16_t currentMagazines);
     //void displayHUD(uint16_t currentAmmo,uint16_t currentMagazines,uint16_t currentShield,uint16_t currentHealth);
 
     void noMagazineInserted();
@@ -49,6 +51,8 @@ class fosmltDisplay
     uint16_t shieldLastValue;
     uint16_t armourLastValue;
     uint16_t healthLastValue;
+
+    uint8_t lastReloadTick;
 
     uint16_t maxAmmo;
     uint16_t maxMagazines;

@@ -22,6 +22,7 @@ const uint8_t hor = 128;
 const uint8_t margin = 4;
 const uint8_t barWidth = 6;
 const uint8_t fullbarSize = (hor-(margin*2)); //120
+const uint8_t reloadDivisions = (hor/5);
 //const uint8_t elementSpacing = 2; //spacing for Gs //make this 28 maybe
 const uint8_t charW = 5;
 const uint8_t charH = 8;
@@ -40,13 +41,14 @@ fosmltDisplay::fosmltDisplay()
 {
   #if defined(tft128x160)
   tft.init();
-  tft.setRotation(0);
+  //tft.setRotation(0);
   tft.fillScreen(background);
   ammoLastValue = 0;
   magazinesLastValue = 0;
   armourLastValue = 0;
   shieldLastValue = 0;
   healthLastValue = 0;
+  lastReloadTick = 0;
   #endif
 }
 
@@ -92,7 +94,7 @@ void fosmltDisplay::updateMagazines(uint16_t currentMagazines)
   magazinesLastValue = currentMagazines;
 }
 
-void fosmltDisplay::reloadClear()
+void fosmltDisplay::reloadStart()
 {
   #if defined(lcd16x02)
   lcd.setCursor(0,0);
@@ -101,10 +103,13 @@ void fosmltDisplay::reloadClear()
   lcd.print("        ");
   #endif
   #if defined(tft128x160)
+  uint8_t attr = 4;
+  updateBar(0,1,1,attr); //clear bar
+  lastReloadTick = 0;
   #endif
 }
 
-void fosmltDisplay::reloadAnimation(uint8_t tick)
+void fosmltDisplay::reloadAnimation(uint32_t time, uint16_t reloadTime, uint32_t timeStartedReloading)
 {
   #if defined(lcd16x02)
   tick--;
@@ -112,6 +117,43 @@ void fosmltDisplay::reloadAnimation(uint8_t tick)
   lcd.print('#');
   #endif
   #if defined(tft128x160)
+  //use magazine bar to show reloading progress
+  uint8_t attr = 4;
+  uint8_t tick = (((time-timeStartedReloading)*reloadDivisions)/reloadTime);
+  if (tick <= (reloadDivisions)) //this animation happens before we leave the reloading state, so prevent tick being 25 once
+  {
+    updateBar(tick,lastReloadTick,reloadDivisions,attr);
+    lastReloadTick = tick;
+  }
+  #endif
+}
+
+void fosmltDisplay::reloadInterrupted()
+{
+  #if defined(lcd16x02)
+  lcd.setCursor(0,0);
+  lcd.print("        ");
+  lcd.setCursor(8,0);
+  lcd.print("        ");
+  #endif
+  #if defined(tft128x160)
+  uint8_t attr = 4;
+  updateBar(0,1,1,attr); //clear bar
+  updateBar(magazinesLastValue,0,maxMagazines,attr); //set bar to lastMagazine
+  #endif
+}
+
+void fosmltDisplay::reloadFinish(uint16_t currentMagazines)
+{
+  #if defined(lcd16x02)
+  lcd.setCursor(0,0);
+  lcd.print("        ");
+  lcd.setCursor(8,0);
+  lcd.print("        ");
+  #endif
+  #if defined(tft128x160)
+  magazinesLastValue = maxMagazines;
+  updateMagazines(currentMagazines);
   #endif
 }
 
@@ -244,12 +286,11 @@ void fosmltDisplay::buildHealthUI(uint16_t currentHealth,uint16_t maxHealth)
 
 void fosmltDisplay::updateBar(uint16_t current, uint16_t last, uint16_t max, uint8_t pos)
 {
-  printf("current: %i, last: %i, max: %i, pos: %i \n", current,last,max,pos);
-  if (current < last)
+  if (current < last) //remove bar using background
   {
     tft.fillRect((current*fullbarSize)/max, barPos[pos], (hor-margin), barWidth, background);
   }
-    else if (current > last)
+    else if (current > last) //add bar
   {
     tft.fillRect(margin, barPos[pos], (current*fullbarSize)/max, barWidth, colours[pos]);
   } 
@@ -257,6 +298,7 @@ void fosmltDisplay::updateBar(uint16_t current, uint16_t last, uint16_t max, uin
   {
   }
 }
+
 uint8_t fosmltDisplay::digitLength(uint16_t num)
 {
   uint8_t length = 0;

@@ -105,7 +105,7 @@ uint16_t muzzleFlashTime = 250;
 unsigned long timeLastshot = 0;
 
 bool reloading = false;
-unsigned long timeStartedReloading;
+uint32_t timeStartedReloading;
 const bool reloadInterruptable = true;
 
 void EventBLEConnect();
@@ -116,6 +116,7 @@ void EventOutOfAmmo();
 void EventReloading();
 void EventReloaded();
 void EventReloadInterrupted();
+void scheduler(uint32_t time);
 
 //To be replace with bluetooth received variables
   int IRheader = 2400; //high
@@ -202,13 +203,7 @@ void loop() {
       EventReloading();
     }
   }
-  if (reloading)
-  {
-    if (millis() >= (reloadTime + timeStartedReloading))
-    {
-      EventReloaded();
-    }
-  }
+  scheduler(millis());
 }
 
 /*************************************************************************EVENTS
@@ -264,7 +259,7 @@ void EventReloading()
   {
     canIshoot = false;
   }
-//display
+  display.reloadStart();
 }
 
 void EventReloaded()
@@ -276,7 +271,8 @@ void EventReloaded()
   canIshoot = true;
   reloading = 0;
   display.updateAmmo(currentAmmo);
-  display.updateMagazines(currentMagazines);
+  display.reloadFinish(currentMagazines);
+  //display.updateMagazines(currentMagazines);
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
   Serial.print('\n');
@@ -286,4 +282,18 @@ void EventReloadInterrupted()
 {
   Serial.println("EventReloadInterrupted");
   reloading = false;
+  display.reloadInterrupted();
+}
+
+void scheduler(uint32_t time)  //to be replaced with esp alarms and interupts
+{
+  if (reloading)
+  {
+    display.reloadAnimation(time,reloadTime,timeStartedReloading);
+    if (time >= (reloadTime + timeStartedReloading))
+    {
+      EventReloaded();
+    }
+  }
+
 }
