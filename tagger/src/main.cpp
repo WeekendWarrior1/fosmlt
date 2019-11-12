@@ -7,6 +7,7 @@
 
 #include <fosmltIRSend.h>
 #include <fosmltDisplay.h>
+#include <fosmltLEDtagger.h>
 
 /********************************************************************GPIO PINS*/
 //(anti-clockwise around chip, starting at top left corner)
@@ -33,7 +34,7 @@
 //GPIO 2 trigger
 
 //GPIO 0 
-//GPIO 4 
+//GPIO 4 WS2812B RGB LED
 //GPIO 16
 //GPIO 17 
 //GPIO 5 
@@ -100,7 +101,7 @@ uint16_t reloadTime = 1600;
 uint16_t RPM = 120;
 unsigned long IRShotDelay = 60000/RPM; //convert roundsPerMinute into a millisecond delay between shots
                                           //change into genROF func later on
-uint16_t muzzleFlashTime = 250;
+uint16_t muzzleFlashTime = 720;
 
 unsigned long timeLastshot = 0;
 
@@ -165,6 +166,9 @@ void setup() {
   //display.buildPlayerUI(uint16_t currentShield,uint16_t maxShieldRec,uint16_t currentArmour,uint16_t maxArmourRec,uint16_t currentHealth,uint16_t maxHealthRec)
   display.buildPlayerUI(100,100,100,100,100,100);
 
+  //delay(720); //super ugly fix for our animation scheduler, figure out how to do this nicely
+              //would break in the first muzzleFlash time because of the check
+              //using fadetoblack solves this, but is that okay?
 }
 
 void loop() {
@@ -236,6 +240,7 @@ void EventFiredTagger()
   timeLastshot = millis();
   //DacAudio.Play(&shoot,true);
   display.updateAmmo(currentAmmo);
+  LED.muzzleFlash();
   Serial.print("Shot fired, Ammo: ");
   Serial.print(currentAmmo);
   Serial.print('\n');
@@ -295,5 +300,8 @@ void scheduler(uint32_t time)  //to be replaced with esp alarms and interupts
       EventReloaded();
     }
   }
-
+  if (time < (timeLastshot+muzzleFlashTime))
+  {
+    LED.muzzleFade(time, muzzleFlashTime, timeLastshot);
+  }
 }
