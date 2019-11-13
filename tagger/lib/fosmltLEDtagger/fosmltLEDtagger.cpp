@@ -1,4 +1,5 @@
-#define addressableLED //any supported by the fastLED, https://github.com/FastLED/FastLED#supported-led-chipsets
+//#define fastled //any supported by the fastLED, https://github.com/FastLED/FastLED#supported-led-chipsets
+#define neopixel
 //define LED //single colour LED
 //#define 4legRGB
 //#define dummyLED //define if no LEDs
@@ -34,59 +35,67 @@ On Body:
 //should seperate muzzle and rest of tagger
 //aim to run light animations at 25fps -> so once every 40ms (how does this fit in to tagger timeTakenToFire?)
 
-//#if defined(addressableLED)
-#include "FastLED.h"
 #define NUM_LEDS 1
 #define LED_CHIP WS2812B
 #define DATA_PIN 4
-uint8_t max_bright = 255;                                      // Overall brightness definition. It can be changed on the fly, i.e. with a potentiometer.
+#if defined(fastled)
+//#include "FastLED.h"
+//#include <SPI.h>
+uint8_t max_bright = 255;
 //#FASTLED_USING_NAMESPACE
 CRGB leds[NUM_LEDS];
-//#endif
+#endif
+#if defined(neopixel)
+#include <Adafruit_NeoPixel.h>
+Adafruit_NeoPixel pixels(NUM_LEDS, DATA_PIN, NEO_GRB + NEO_KHZ800);
+#endif
+
 
 fosmltLEDtagger::fosmltLEDtagger()
 {
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-  //FastLED.addLeds<LED_CHIP, DATA_PIN, GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(max_bright);                          // You can change the overall brightness on the fly, i.e. with a potentiometer.
-}
-
-void fosmltLEDtagger::blinkRed()
-{
-  for (int i=0; i< NUM_LEDS;i++)
-  {
-    leds[i].setRGB(255,0,0);
-  }
-  FastLED.show();
-  delay(100);
-  printf("End of delay\n");
-  //printf("attributes[arrayPos]: %s, (hor/2): %i, textPos[arrayPos]: %i, fontSize: %i \n", attributes[arrayPos],(hor/2),textPos[arrayPos],fontSize);
-// Now turn the LED off, then pause
-  for (int i=0; i< NUM_LEDS;i++)
-  {
-    leds[i].setRGB(255,0,0);
-  }
-  FastLED.show();
+  #if defined(fastled)
+    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.setBrightness(max_bright);
+    leds[0].setRGB(0,0,0);;
+    FastLED.show();
+  #endif
+  #if defined(neopixel)
+    pixels.begin();
+    pixels.clear();
+  #endif
 }
 
 void fosmltLEDtagger::muzzleFlash()
 {
   this->lastFadeTick = 0;
-  leds[0].setRGB(255,0,0);
-  FastLED.show();
+  #if defined(fastled)
+    leds[0].setRGB(255,0,0);;
+    FastLED.show();
+  #endif
+  #if defined(neopixel)
+    pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+    pixels.show();
+  #endif
 }
 
 void fosmltLEDtagger::muzzleFade(uint32_t time, uint16_t muzzleFlashTime, uint32_t timeLastshot)
 {
-  static uint8_t fadeDivisions = ((muzzleFlashTime*25)/1000);//(((muzzleFlashTime*25)/1000)*256)/((time-timeLastshot)); //25 frames per second == 18 atm
+  static uint8_t fadeDivisions = ((muzzleFlashTime*25)/1000); //25 frames per second
   static uint8_t fadeIncrements = muzzleFlashTime/fadeDivisions;
   uint8_t tick = (time-timeLastshot)/fadeIncrements;
   if (tick > lastFadeTick)
   {
     uint8_t fader = (256*tick)/fadeDivisions;
-    //printf("fadeDivisions: %i, fadeIncrements: %i, tick: %i, fader: %i \n",fadeDivisions,fadeIncrements,tick,fader);
-    leds[0].fadeToBlackBy(fader);
     lastFadeTick = tick;
-    FastLED.show();
+    if (tick == fadeDivisions) {fader = 255;} //always 0 by last tick
+    //printf("fadeDivisions: %i, fadeIncrements: %i, tick: %i, fader: %i \n",fadeDivisions,fadeIncrements,tick,fader);
+    #if defined(fastled)
+      leds[0].fadeToBlackBy(fader);;
+      FastLED.show();
+    #endif
+    #if defined(neopixel)
+      pixels.setPixelColor(0, pixels.Color((255-fader), 0, 0));
+      pixels.show();
+    #endif
   }
 }

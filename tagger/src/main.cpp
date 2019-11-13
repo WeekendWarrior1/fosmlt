@@ -5,10 +5,15 @@
 
 #include <Arduino.h>
 
-#include <fosmltIRSend.h>
 #include <fosmltDisplay.h>
+
+//#define FASTLED_ESP32_I2S true
+//#define FASTLED_RMT_BUILTIN_DRIVER
+//#define FASTLED_RMT_BUILTIN_DRIVER true
+//#define FASTLED_RMT_MAX_CHANNELS 7
 #include <fosmltLEDtagger.h>
 
+#include <fosmltIRSend.h>
 /********************************************************************GPIO PINS*/
 //(anti-clockwise around chip, starting at top left corner)
 //GPIO 36
@@ -101,7 +106,7 @@ uint16_t reloadTime = 1600;
 uint16_t RPM = 120;
 unsigned long IRShotDelay = 60000/RPM; //convert roundsPerMinute into a millisecond delay between shots
                                           //change into genROF func later on
-uint16_t muzzleFlashTime = 720;
+uint16_t muzzleFlashTime = 250; //TODO doesn't work nicely with muzzleAnimation below 250
 
 unsigned long timeLastshot = 0;
 
@@ -135,6 +140,8 @@ void scheduler(uint32_t time);
 /**********************************************************************Display*/
   fosmltDisplay display;    //definitions done in fosmltDisplay.cpp && if tft display, platformio.ini buildflags
 
+/**************************************************************************LED*/
+  fosmltLEDtagger LED;    //definitions done in fosmltLEDtagger.cpp, platformio.ini buildflags
 void setup() {
   Serial.begin(115200);
   Serial.println("Setup");
@@ -160,15 +167,13 @@ void setup() {
   shotPacket.gunDMG = gunDMG;
   tagger.attach(shotPacket,IRheader,IR1,IR0,IRgap,IRfreq,playerIDlength,teamIDlength,gunDMGlength,packetTotalLength);
 
-  //display.buildMagazineUI(currentMagazines,maxMagazines);
   display.buildTaggerUI(currentAmmo,maxAmmo,currentMagazines,maxMagazines);
-  //display.buildMagazineUI(currentMagazines,maxMagazines);
-  //display.buildPlayerUI(uint16_t currentShield,uint16_t maxShieldRec,uint16_t currentArmour,uint16_t maxArmourRec,uint16_t currentHealth,uint16_t maxHealthRec)
   display.buildPlayerUI(100,100,100,100,100,100);
 
-  //delay(720); //super ugly fix for our animation scheduler, figure out how to do this nicely
+  delay(muzzleFlashTime); //super ugly fix for our animation scheduler, figure out how to do this nicely
               //would break in the first muzzleFlash time because of the check
               //using fadetoblack solves this, but is that okay?
+              //definelty not okay to leave this problem, was breaking whole scheduler
 }
 
 void loop() {
@@ -277,7 +282,6 @@ void EventReloaded()
   reloading = 0;
   display.updateAmmo(currentAmmo);
   display.reloadFinish(currentMagazines);
-  //display.updateMagazines(currentMagazines);
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
   Serial.print('\n');
