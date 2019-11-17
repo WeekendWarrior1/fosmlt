@@ -135,13 +135,20 @@ void scheduler(uint32_t time);
   int teamID = 2;
   //int gunDMG = gunDMG;
 
-  fosmltIRSend tagger;
+  fosmltIRSend ir;
 
 /**********************************************************************Display*/
   fosmltDisplay display;    //definitions done in fosmltDisplay.cpp && if tft display, platformio.ini buildflags
 
 /**************************************************************************LED*/
-  fosmltLEDtagger LED;    //definitions done in fosmltLEDtagger.cpp, platformio.ini buildflags
+//declarations of LEDs front to back
+  uint8_t muzzleLEDpos[] = {3,2};
+  uint8_t taggerLEDpos[] = {1,0};
+
+  fosmltLEDtagger LED(2, muzzleLEDpos, 2, taggerLEDpos);    //definitions done in fosmltLEDtagger.cpp, platformio.ini buildflags
+  //fosmltLEDtagger(muzzleLEDs, muzzleLEDpos[], taggerLEDs, taggerLEDpos[]);
+
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Setup");
@@ -165,12 +172,12 @@ void setup() {
   shotPacket.playerID = playerID;
   shotPacket.teamID = teamID;
   shotPacket.gunDMG = gunDMG;
-  tagger.attach(shotPacket,IRheader,IR1,IR0,IRgap,IRfreq,playerIDlength,teamIDlength,gunDMGlength,packetTotalLength);
+  ir.attach(shotPacket,IRheader,IR1,IR0,IRgap,IRfreq,playerIDlength,teamIDlength,gunDMGlength,packetTotalLength);
 
   display.buildTaggerUI(currentAmmo,maxAmmo,currentMagazines,maxMagazines);
   display.buildPlayerUI(100,100,100,100,100,100);
 
-  delay(muzzleFlashTime); //super ugly fix for our animation scheduler, figure out how to do this nicely
+  //delay(muzzleFlashTime); //super ugly fix for our animation scheduler, figure out how to do this nicely
               //would break in the first muzzleFlash time because of the check
               //using fadetoblack solves this, but is that okay?
               //definelty not okay to leave this problem, was breaking whole scheduler
@@ -190,11 +197,11 @@ void loop() {
           {
             EventReloadInterrupted();
             Serial.println("Firing");
-            tagger.IRTransmit();
+            ir.IRTransmit();
             EventFiredTagger();
           } else {
             Serial.println("Firing");
-            tagger.IRTransmit();
+            ir.IRTransmit();
             EventFiredTagger();
           }
         }
@@ -270,6 +277,7 @@ void EventReloading()
     canIshoot = false;
   }
   display.reloadStart();
+  LED.startReloadAnimation();
 }
 
 void EventReloaded()
@@ -282,6 +290,7 @@ void EventReloaded()
   reloading = 0;
   display.updateAmmo(currentAmmo);
   display.reloadFinish(currentMagazines);
+  LED.reloadInterrupted(); //also clears tagger LEDs
   Serial.print("Tagger reloaded, Magazines: ");
   Serial.print(currentMagazines);
   Serial.print('\n');
@@ -292,6 +301,7 @@ void EventReloadInterrupted()
   Serial.println("EventReloadInterrupted");
   reloading = false;
   display.reloadInterrupted();
+  LED.reloadInterrupted();
 }
 
 void scheduler(uint32_t time)  //to be replaced with esp alarms and interupts
@@ -299,13 +309,21 @@ void scheduler(uint32_t time)  //to be replaced with esp alarms and interupts
   if (reloading)
   {
     display.reloadAnimation(time,reloadTime,timeStartedReloading);
+    LED.reloadingAnimation(time,reloadTime,timeStartedReloading);
     if (time >= (reloadTime + timeStartedReloading))
     {
       EventReloaded();
     }
   }
-  if (time < (timeLastshot+muzzleFlashTime))
+  if (timeLastshot)
   {
-    LED.muzzleFade(time, muzzleFlashTime, timeLastshot);
+    if (time < ((timeLastshot)+muzzleFlashTime)) //don't start muzzle led until after IR has finished firing
+    {
+      LED.muzzleFade(time, muzzleFlashTime, (timeLastshot));
+    }
+    if (time < ((timeLastshot)+LED.taggerAnimationTime)) //Tagger animation
+    {
+      LED.taggerAnimation(time, timeLastshot);
+    }
   }
 }
